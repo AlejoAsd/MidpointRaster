@@ -1,6 +1,7 @@
 var targetCanvas = "canvas";
 var targetRadius = "radius";
 var targetStep = "step";
+var targetTable = "results"
 
 var minRadius = 3;
 var maxRadius = 100;
@@ -10,8 +11,21 @@ var side = 0;
 var drawTimer = undefined;
 var drawTickLength = 250;
 
+function addResult(target, step, D, x, y)
+{
+	var rowname = "result-" + step
+	row = $('<tr align="center" id=' + rowname + ' name=' + rowname + '>');
+	row.append($('<td>').text(step));
+	row.append($('<td>').text(D));
+	row.append($('<td>').text(x));
+	row.append($('<td>').text(y));
+
+	$("#" + target).append(row);
+}
+
 function reset(target)
 {
+	stopDrawTimer();
 	setStep(0);
 	clearCanvas(target);
 }
@@ -134,7 +148,6 @@ function startDrawTimer()
 {
 	if (drawTimer == undefined)
 	{
-		reset(targetCanvas);
 		drawTimer = setInterval(drawTick, drawTickLength);
 	}
 }

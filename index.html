@@ -5,6 +5,7 @@
         <title>Midpoint Rasterisation</title>
 
     	<link href="css/bootstrap.min.css" rel="stylesheet">
+    	<link href="css/midpoint.css" rel="stylesheet">
 
 		<script src="js/canvas.js"></script>
         <script src="js/midpoint.js"></script>
@@ -28,7 +29,7 @@
 							</div>
 							<div class="row">
 								<div class="col-md-12">
-									<input type="text" class="form-control" id="radius" name="radius" value="5" onchange="radiusChange()"></input>
+									<input type="text" class="form-control" id="radius" name="radius" value="5" onchange="radiusChange()">
 								</div>
 							</div>
 							<br>
@@ -70,6 +71,24 @@
 							</div>
 						</div>
 					</div>
+					<div class="thumbnail">
+						<div class="caption">
+							<div class="row">
+								<div class="col-md-12">
+									<div class="container-scrollbar">
+										<table class="table table-striped table-condensed table-hover table-bordered" id="results" name="results">
+											<thead align="center">
+												<td>Step</td>
+												<td>D</td>
+												<td>X</td>
+												<td>Y</td>
+											</thead>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -78,6 +97,8 @@
 		$(document).ready(function() 
 		{
     		radiusChange();
+    		for (i = 0; i < 20; i++) 
+    			addResult(targetTable, i, 5+i, 5+i, 0+i);
 		});
 		</script>
     </body>
