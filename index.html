@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Midpoint Rasterisation</title>
+
+    	<link href="css/bootstrap.min.css" rel="stylesheet">
+
+		<script src="js/canvas.js"></script>
+        <script src="js/midpoint.js"></script>
+        <script src="js/jquery.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+    </head>
+    <body>
+    	<br>
+    	<div class="container-fluid">
+	    	<div class="row">
+				<div class="col-md-9">
+					<canvas class="center-block" id="canvas" name="canvas" height="550" width="550"></canvas>
+				</div>
+				<div class="col-md-3">
+					<div class="thumbnail">
+						<div class="caption">
+							<div class="row">
+								<div class="col-md-12">
+									<h4>Radius</h4>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-12">
+									<input type="text" class="form-control" id="radius" name="radius" value="5" onchange="radiusChange()"></input>
+								</div>
+							</div>
+							<br>
+							<div class="row">
+								<div class="col-md-12">
+									<h4>Step</h4>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-2">
+									<button type="button" class="btn btn-primary" onclick="stepDecrease(true)">
+										<span class="glyphicon glyphicon-minus"></span>
+									</button>
+								</div>
+								<div class="col-md-7">
+									<p class="lead text-center" id="step" name="step" size="15">0</p>
+								</div>
+								<div class="col-md-2">
+									<button type="button" class="btn btn-danger" onclick="stepIncrease(true)">
+										<span class="glyphicon glyphicon-plus"></span>
+									</button>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-12">
+									<h4>Actions</h4>
+								</div>
+							</div>
+							<div class="row center-block">
+								<div class="col-md-4">
+									<button class="btn btn-danger" onclick="reset(targetCanvas)">Reset</button>
+								</div>
+								<div class="col-md-4">
+									<button class="btn btn-primary" onclick="startDrawTimer()">Draw</button>
+								</div>
+								<div class="col-md-4">
+									<button class="btn btn-primary" onclick="stopDrawTimer()">Stop</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+		$(document).ready(function() 
+		{
+    		radiusChange();
+		});
+		</script>
+    </body>
+</html>
