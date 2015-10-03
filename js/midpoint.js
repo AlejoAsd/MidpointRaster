@@ -1,77 +1,206 @@
 var targetCanvas = "canvas";
 var targetRadius = "radius";
+var targetInterval = "interval";
 var targetStep = "step";
+var targetTable = "results"
 
-var minRadius = 3;
-var maxRadius = 100;
+var minRadius = 1;
+var maxRadius = 270;
+
+var originX;
+var originY;
 
 var side = 0;
+var minSide = 1;
 
 var drawTimer = undefined;
-var drawTickLength = 250;
+var minDrawTickLength = 25;
+var maxDrawTickLength = 5000;
 
-function reset(target)
+function init()
 {
-	setStep(0);
+	var canvas = getCanvas(targetCanvas);
+	originX = canvas.width / 2;
+	originY = canvas.height / 2;
+}
+
+function addResult(target, step, D, x, y)
+{
+	var rowname = "result-" + step
+	var stepname = "step-" + step
+	var dname = "d-" + step
+	var xname = "x-" + step
+	var yname = "y-" + step
+	
+	row = $('<tr align="center" id=' + rowname + ' name=' + rowname + '>');
+	row.append($('<td id="' + stepname + '" name="' + stepname + '">').text(step));
+	row.append($('<td id="' + dname + '" name="' + dname + '">').text(D));
+	row.append($('<td id="' + xname + '" name="' + xname + '">').text(x));
+	row.append($('<td id="' + yname + '" name="' + yname + '">').text(y));
+
+	$("#" + target).append(row);
+}
+
+function removeResult(step)
+{
+	$('#result-' + step).remove();
+}
+
+function reset(target, targetResults)
+{
+	stopDrawTimer();
+	setStep(targetStep, 0);
 	clearCanvas(target);
+	clearResults(targetResults);
 }
 
-function getRadius()
+function getX(step)
 {
-	return Math.floor($("#" + targetRadius)[0].value);
+	var xname = "x-" + step;
+	return Math.floor($("#" + xname).text());
 }
 
-function setRadius(value)
+function getY(step)
 {
-	return $("#" + targetRadius)[0].value = value;
+	var yname = "y-" + step;
+	return Math.floor($("#" + yname).text());
 }
 
-function getStep()
+function getD(step)
 {
-	return Math.floor($("#" + targetStep).text());
+	var dname = "d-" + step;
+	return Math.floor($("#" + dname).text());
 }
 
-function setStep(value)
+function getRadius(target)
 {
-	$("#" + targetStep).text(value);
+	return Math.floor($("#" + target)[0].value);
+}
+
+function setRadius(target, value)
+{
+	return $("#" + target)[0].value = value;
+}
+
+function getDrawTickLength(target)
+{
+	return Math.floor($("#" + target)[0].value);
+}
+
+function setDrawTickLength(target, value)
+{
+	return $("#" + target)[0].value = value;
+}
+
+function getDrawTickLength(target)
+{
+	return Math.floor($("#" + target)[0].value);
+}
+
+function setDrawTickLength(target, value)
+{
+	return $("#" + target)[0].value = value;
+}
+
+function getStep(target)
+{
+	return Math.floor($("#" + target).text());
+}
+
+function setStep(target, value)
+{
+	$("#" + target).text(value);
+}
+
+function clearResults(target)
+{
+	$('#' + target + ' tbody').remove();
+}
+
+function translate(origin, jumps, side)
+{
+	return origin + jumps * side;
 }
 
 function radiusChange()
 {
 	// Get and validate radius
-	var radius = getRadius();
+	var radius = getRadius(targetRadius);
 
 	if (radius < minRadius)
-		setRadius(minRadius)
+		setRadius(targetRadius, minRadius)
 	else if (radius > maxRadius)
-		setRadius(maxRadius);
+		setRadius(targetRadius, maxRadius);
 
 	// Reset values
-	reset(targetCanvas);
+	reset(targetCanvas, targetTable);
 
 	// Calculate new side length
 	var canvas = getCanvas(targetCanvas);
-	var stepWidth = Math.floor(canvas.width / radius / 2);
-	var stepHeight = Math.floor(canvas.height / radius / 2);
+	var stepWidth = Math.floor(canvas.width / (radius + 2) / 2);
+	var stepHeight = Math.floor(canvas.height / (radius + 2) / 2);
 
 	if (stepWidth < stepHeight)
 		side = stepWidth;
 	else
 		side = stepHeight;
+	
+	if (side <= minSide)
+		side = minSide;
+}
+
+function intervalChange()
+{
+	// Get and validate interval
+	var interval = getDrawTickLength(targetInterval);
+
+	if (interval < minDrawTickLength)
+		setDrawTickLength(targetInterval, minDrawTickLength);
+	else if (interval > maxDrawTickLength)
+		setDrawTickLength(targetInterval, maxDrawTickLength);
+
+	// Reset values
+	reset(targetCanvas, targetTable);
 }
 
 function getStepCoordinates(step, radius)
-{	
-	var quadrant = Math.floor((1 + step) / radius);
+{
+	// Important points
+	var canvas = getCanvas(targetCanvas);
+	var targetX = canvas.width / 2;
+	var targetY = canvas.height / 2;
+		
+	// Set iteration values
+	var x;
+	var y;
+	var D;
+	if (step == 0)
+	{
+		x = getRadius(targetRadius);
+		y = 0;
+		D = 1 - x; 
+	}
+	else
+	{
+		x = getX(step);
+		y = getY(step) + 1;
+		D = getD(step);
+	}
+	
+	// Calculate next coordinates
+	// Y++
+	if (D <= 0)
+	{
+		D += 2 * y + 1;
+	}
+	// Y++ X--
+	else
+	{
+		x--;
+		D += 2 * (y - x) + 1;
+	}
 
-	// Check for circular repetition
-	if (quadrant >= 4)
-		return;
-
-	var x = step * side;
-	var y = step * side;
-
-	return {'x':x, 'y':y};
+	return {'x':x, 'y':y, 'D':D};
 }
 
 function stepIncrease(stopTimer)
@@ -79,8 +208,13 @@ function stepIncrease(stopTimer)
 	if (stopTimer)
 		stopDrawTimer();
 
-	var radius = getRadius();
-	var step = getStep();
+	var radius = getRadius(targetRadius);
+	var step = getStep(targetStep);
+	
+	// Check for circular repetition
+	var quadrant = getY(step) / getX(step);
+	if (quadrant >= 1)
+		return;
 	
 	// Get coords
 	coords = getStepCoordinates(step, radius);
@@ -89,8 +223,18 @@ function stepIncrease(stopTimer)
 	if (coords)
 	{
 		step++
-		setStep(step);
-		addPoint(targetCanvas, coords.x, coords.y, side);
+		setStep(targetStep, step);
+		// 8 Octants
+		addPoint(targetCanvas, translate(originX, coords.x, side), translate(originY, coords.y, side), side);
+		addPoint(targetCanvas, translate(originX, coords.y, side), translate(originY, coords.x, side), side);
+		addPoint(targetCanvas, translate(originX, -coords.x, side), translate(originY, coords.y, side), side);
+		addPoint(targetCanvas, translate(originX, -coords.y, side), translate(originY, coords.x, side), side);
+		addPoint(targetCanvas, translate(originX, -coords.x, side), translate(originY, -coords.y, side), side);
+		addPoint(targetCanvas, translate(originX, -coords.y, side), translate(originY, -coords.x, side), side);
+		addPoint(targetCanvas, translate(originX, coords.x, side), translate(originY, -coords.y, side), side);
+		addPoint(targetCanvas, translate(originX, coords.y, side), translate(originY, -coords.x, side), side);
+		
+		addResult(targetTable, step, coords.D, coords.x, coords.y);
 		return true;
 	}
 	else return;
@@ -101,8 +245,8 @@ function stepDecrease(stopTimer)
 	if (stopTimer)
 		stopDrawTimer();
 
-	var radius = getRadius();
-	var step = getStep();
+	var radius = getRadius(targetRadius);
+	var step = getStep(targetStep);
 	if (step <= 0)
 	{
 		step = 0;
@@ -114,8 +258,17 @@ function stepDecrease(stopTimer)
 
 	if (coords)
 	{
-		setStep(step);
-		addPoint(targetCanvas, coords.x, coords.y, side+1, true);
+		removeResult(step + 1);
+		setStep(targetStep, step);
+		// 8 Octants
+		addPoint(targetCanvas, translate(originX, coords.x, side), translate(originY, coords.y, side), side + 1, true);
+		addPoint(targetCanvas, translate(originX, coords.y, side), translate(originY, coords.x, side), side + 1, true);
+		addPoint(targetCanvas, translate(originX, -coords.x, side), translate(originY, coords.y, side), side + 1, true);
+		addPoint(targetCanvas, translate(originX, -coords.y, side), translate(originY, coords.x, side), side + 1, true);
+		addPoint(targetCanvas, translate(originX, -coords.x, side), translate(originY, -coords.y, side), side + 1, true);
+		addPoint(targetCanvas, translate(originX, -coords.y, side), translate(originY, -coords.x, side), side + 1, true);
+		addPoint(targetCanvas, translate(originX, coords.x, side), translate(originY, -coords.y, side), side + 1, true);
+		addPoint(targetCanvas, translate(originX, coords.y, side), translate(originY, -coords.x, side), side + 1, true);
 		return true;
 	}
 	else return;
@@ -134,8 +287,7 @@ function startDrawTimer()
 {
 	if (drawTimer == undefined)
 	{
-		reset(targetCanvas);
-		drawTimer = setInterval(drawTick, drawTickLength);
+		drawTimer = setInterval(drawTick, getDrawTickLength(targetInterval));
 	}
 }
 
